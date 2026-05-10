@@ -92,7 +92,7 @@ export const IMG = {
   ),
   // Rhinitis
   diseaseRhinitis: slot(
-    u('1584516150909-c43483ee7932', 800),
+    '/rhinitis.png',
     'sinus',
     'Rhinitis alergi — pilek kronis',
   ),
