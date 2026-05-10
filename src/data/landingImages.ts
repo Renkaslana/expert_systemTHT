@@ -68,25 +68,25 @@ export const IMG = {
   // ── Knowledge base — per-disease ─────────────────────────────────
   // Ear / Otitis Media
   diseaseEar: slot(
-    u('1666214280557-f1b5e25dba66', 1200),
+    '/otitis.png',
     'ear',
     'Pemeriksaan telinga dengan otoskop premium',
   ),
   // Ear canal / Serumen
   diseaseSerumen: slot(
-    u('1559757175-5700dde675bc', 800),
+    '/serumen.png',
     'ear',
     'Detail anatomi telinga manusia',
   ),
   // Otitis Externa
   diseaseExterna: slot(
-    u('1582719471384-894fbb16e074', 800),
+    '/eksterna.png',
     'ear',
     'Otitis eksterna — radang liang telinga luar',
   ),
   // Sinusitis
   diseaseSinus: slot(
-    u('1584467735815-f778f274e296', 800),
+    '/sinusitis.png',
     'sinus',
     'Pemeriksaan sinus — pasien dengan keluhan sinusitis',
   ),
