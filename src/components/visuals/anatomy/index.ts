@@ -1,0 +1,5 @@
+export { EarCrossSection } from './EarCrossSection'
+export { EarCanalCloseup } from './EarCanalCloseup'
+export { SinusCavities } from './SinusCavities'
+export { ThroatTonsils } from './ThroatTonsils'
+export { NasalPassage } from './NasalPassage'

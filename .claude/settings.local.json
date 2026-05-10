@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install *)",
+      "Bash(npx tsc *)",
+      "Bash(npx vite *)",
+      "Bash(npm run *)",
+      "PowerShell($sistem = Get-ChildItem -Path \"c:\\\\Users\\\\Asus TUF\\\\Documents\\\\Project\\\\Sistem_Pakar_THT\\\\src\" -Recurse -File | Sort-Object LastWriteTime -Descending | Select-Object -First 1 | ForEach-Object {$_.LastWriteTime}; $diagnova = Get-ChildItem -Path \"c:\\\\Users\\\\Asus TUF\\\\Documents\\\\Project\\\\Diagnova\\\\frontend\\\\app\" -Recurse -File | Sort-Object LastWriteTime -Descending | Select-Object -First 1 | ForEach-Object {$_.LastWriteTime}; \"Sistem_Pakar_THT: $sistem`nDiagnova: $diagnova\")"
+    ]
+  }
+}
