@@ -186,8 +186,10 @@ export function Navbar() {
         transition={{ duration: 0.2 }}
         className={cn(
           'fixed inset-x-0 top-[68px] z-40 md:hidden',
-          'bg-[rgba(4,7,18,0.95)] backdrop-blur-2xl border-b border-white/[0.06]',
-          'shadow-[0_24px_60px_-20px_rgba(0,0,0,0.8)]',
+          'bg-background/95 backdrop-blur-2xl border-b border-border/60',
+          'shadow-[0_24px_60px_-20px_rgba(15,23,42,0.18)]',
+          'dark:bg-[rgba(4,7,18,0.95)] dark:border-white/[0.06]',
+          'dark:shadow-[0_24px_60px_-20px_rgba(0,0,0,0.8)]',
           mobileOpen ? 'pointer-events-auto' : 'pointer-events-none',
         )}
       >
@@ -201,8 +203,8 @@ export function Navbar() {
                 cn(
                   'rounded-xl px-4 py-3 text-[15px] font-medium transition-colors',
                   isActive
-                    ? 'bg-white/[0.08] text-white'
-                    : 'text-slate-400 hover:text-white hover:bg-white/[0.05]',
+                    ? 'bg-foreground/[0.06] text-foreground dark:bg-white/[0.08] dark:text-white'
+                    : 'text-muted-foreground hover:bg-foreground/[0.04] hover:text-foreground dark:text-slate-400 dark:hover:bg-white/[0.05] dark:hover:text-white',
                 )
               }
             >
@@ -212,7 +214,7 @@ export function Navbar() {
           {showCTA && (
             <Link
               to="/konsultasi"
-              className="mt-2 flex items-center justify-center gap-2 rounded-xl bg-sky-500 px-4 py-3 text-[15px] font-semibold text-white"
+              className="mt-2 flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-[15px] font-semibold text-primary-foreground transition-colors hover:bg-primary/90 dark:bg-sky-500 dark:hover:bg-sky-400 dark:text-white"
             >
               <Activity className="h-4 w-4" />
               Mulai Konsultasi
