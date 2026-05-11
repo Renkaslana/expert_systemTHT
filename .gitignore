@@ -1,10 +1,55 @@
-node_modules
-dist
-dist-ssr
-.vite
-.claude
-.DS_Store
+# ─────────────────────────────────────────────────────────────────
+# Diagnova — Root .gitignore
+# Covers both frontend/ and backend/ workspaces. Each workspace may
+# also have its own .gitignore for workspace-specific rules.
+# ─────────────────────────────────────────────────────────────────
+
+# Dependencies (re-installable from package-lock)
+**/node_modules/
+.pnp
+.pnp.js
+
+# Build artifacts
+**/dist/
+**/dist-ssr/
+**/build/
+**/coverage/
+**/*.tsbuildinfo
+
+# Vite cache
+**/.vite/
+
+# Environment files (never commit secrets)
 .env
-.env.*
-*.local
+.env.local
+.env.*.local
+**/.env
+**/.env.local
+**/.env.*.local
+# (Keep .env.example tracked — it's the template)
+
+# Tool-specific
+.claude/
+
+# OS metadata
+.DS_Store
+Thumbs.db
+
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
 *.log
+*.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Prisma local artifacts
+**/prisma/migrations/dev.db
+**/*.db
+**/*.db-journal

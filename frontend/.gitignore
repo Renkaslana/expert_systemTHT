@@ -1,0 +1,9 @@
+# Frontend-specific ignores (in addition to root .gitignore)
+node_modules/
+dist/
+dist-ssr/
+.vite/
+*.tsbuildinfo
+.env.local
+.env.*.local
+*.log

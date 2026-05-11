@@ -11,7 +11,7 @@
 
 ### 1.1 Sebelum Fase 6
 ```
-ConsultationPage  →  mockDiagnose(map)  →  src/data/diseases.ts  (static JS)
+ConsultationPage  →  mockDiagnose(map)  →  frontend/src/data/diseases.ts  (static JS)
                                   ↓
                           Hasil "palsu" — algoritma di-mock di browser
 ```
@@ -33,34 +33,34 @@ ConsultationPage  →  fetch POST /api/v1/diagnose  →  Express  →  CF Engine
 
 | File | Tujuan |
 |---|---|
-| `src/lib/api.ts` | Generic fetch wrapper — base URL, error normalization, AbortController support |
-| `src/lib/diagnova-api.ts` | Typed function per endpoint (`diagnose`, `getDiseases`, dll) |
-| `src/vite-env.d.ts` | TypeScript types untuk `import.meta.env.VITE_API_URL` |
-| `.env.local` | `VITE_API_URL=http://localhost:3001/api/v1` |
-| `.env.example` | Template env untuk developer baru |
+| `frontend/src/lib/api.ts` | Generic fetch wrapper — base URL, error normalization, AbortController support |
+| `frontend/src/lib/diagnova-api.ts` | Typed function per endpoint (`diagnose`, `getDiseases`, dll) |
+| `frontend/src/vite-env.d.ts` | TypeScript types untuk `import.meta.env.VITE_API_URL` |
+| `frontend/.env.local` | `VITE_API_URL=http://localhost:3001/api/v1` |
+| `frontend/.env.example` | Template env untuk developer baru |
 
 ### 2.2 File yang diubah
 
 | File | Perubahan |
 |---|---|
-| `src/pages/ConsultationPage.tsx` | `mockDiagnose()` → `await diagnose({ symptoms })`. Tambah `error` state + banner |
-| `src/components/landing/LiveDiagnosisDemo.tsx` | `useMemo(mockDiagnose)` → `useEffect` dengan debounce 250ms + AbortController |
-| `src/pages/DiseaseListPage.tsx` | `import { DISEASES }` → `useEffect + getDiseases()`. Tambah loading skeleton |
-| `src/pages/DiseaseDetailPage.tsx` | `DISEASE_BY_CODE[id]` → `getDiseaseByCode(id) + getDiseases()` paralel. Tambah loading + 404 handling |
-| `src/components/landing/HeroSection.tsx` | Bug fix: "47 Aturan Inferensi" → "34" (match knowledge base aktual) |
+| `frontend/src/pages/ConsultationPage.tsx` | `mockDiagnose()` → `await diagnose({ symptoms })`. Tambah `error` state + banner |
+| `frontend/src/components/landing/LiveDiagnosisDemo.tsx` | `useMemo(mockDiagnose)` → `useEffect` dengan debounce 250ms + AbortController |
+| `frontend/src/pages/DiseaseListPage.tsx` | `import { DISEASES }` → `useEffect + getDiseases()`. Tambah loading skeleton |
+| `frontend/src/pages/DiseaseDetailPage.tsx` | `DISEASE_BY_CODE[id]` → `getDiseaseByCode(id) + getDiseases()` paralel. Tambah loading + 404 handling |
+| `frontend/src/components/landing/HeroSection.tsx` | Bug fix: "47 Aturan Inferensi" → "34" (match knowledge base aktual) |
 
 ### 2.3 File yang dihapus
 
 | File | Alasan |
 |---|---|
-| `src/data/mockDiagnosis.ts` | Mock engine — sudah digantikan backend CF engine. Algoritma ada di `backend/src/domain/cf/cfEngine.ts` |
+| `frontend/src/data/mockDiagnosis.ts` | Mock engine — sudah digantikan backend CF engine. Algoritma ada di `backend/src/domain/cf/cfEngine.ts` |
 
 ### 2.4 File yang tetap ada (bukan mock)
 
 | File | Status |
 |---|---|
-| `src/data/symptoms.ts` | **Frontend reference data** — bundled copy backend KB untuk lookup cepat (`SYMPTOM_BY_CODE`) + UI metadata (`SYMPTOM_CATEGORIES`) yang tidak diexpose API. Banner comment ditambahkan. |
-| `src/data/diseases.ts` | **Frontend reference data** — dipakai oleh landing-page marketing section. Banner comment ditambahkan. |
+| `frontend/src/data/symptoms.ts` | **Frontend reference data** — bundled copy backend KB untuk lookup cepat (`SYMPTOM_BY_CODE`) + UI metadata (`SYMPTOM_CATEGORIES`) yang tidak diexpose API. Banner comment ditambahkan. |
+| `frontend/src/data/diseases.ts` | **Frontend reference data** — dipakai oleh landing-page marketing section. Banner comment ditambahkan. |
 
 > **Catatan:** kedua file di atas BUKAN mock — datanya identik dengan backend (diseed dari sumber yang sama: Setyaputri 2018). Real consultation flow tetap pakai backend. File-file ini hanya bundled copy untuk performa landing page + UI metadata yang tidak ada di backend.
 
@@ -68,7 +68,7 @@ ConsultationPage  →  fetch POST /api/v1/diagnose  →  Express  →  CF Engine
 
 ## 3. Arsitektur api client
 
-### 3.1 `src/lib/api.ts` — generic wrapper
+### 3.1 `frontend/src/lib/api.ts` — generic wrapper
 
 Single source of truth untuk fetch. Bertanggung jawab:
 - **Base URL resolution** dari `import.meta.env.VITE_API_URL` (fallback `http://localhost:3001/api/v1`)
@@ -83,7 +83,7 @@ apiClient.get<T>(path, opts?)
 apiClient.post<T>(path, body, opts?)
 ```
 
-### 3.2 `src/lib/diagnova-api.ts` — typed endpoints
+### 3.2 `frontend/src/lib/diagnova-api.ts` — typed endpoints
 
 Wrapper tipis di atas `apiClient` dengan signature persis sesuai API contract:
 
@@ -108,10 +108,10 @@ Frontend & backend TypeScript types **sengaja identik** (bukan generated, tapi m
 
 | Type | Frontend | Backend |
 |---|---|---|
-| `Symptom` | `src/types/index.ts` | `src/mappers/symptom.mapper.ts` (`SymptomDTO`) |
-| `Disease` | `src/types/index.ts` | `src/mappers/disease.mapper.ts` (`DiseaseDTO`) |
-| `DiagnosisResult` | `src/types/index.ts` | `src/domain/cf/types.ts` (`CFEngineResult`) |
-| `CFRule` | `src/types/index.ts` | repo `RuleRow` |
+| `Symptom` | `frontend/src/types/index.ts` | `backend/src/mappers/symptom.mapper.ts` (`SymptomDTO`) |
+| `Disease` | `frontend/src/types/index.ts` | `backend/src/mappers/disease.mapper.ts` (`DiseaseDTO`) |
+| `DiagnosisResult` | `frontend/src/types/index.ts` | `backend/src/domain/cf/types.ts` (`CFEngineResult`) |
+| `CFRule` | `frontend/src/types/index.ts` | repo `RuleRow` |
 
 Backend mapper memastikan response JSON matching frontend's type. Strict TypeScript di kedua sisi catch drift saat compile.
 
@@ -308,8 +308,8 @@ Engine compute itself ~5ms. Sebagian besar latency = Prisma query + JSON seriali
 | Disease list page | 🔴 Static import | 🟢 `GET /diseases` |
 | Disease detail page | 🔴 Static lookup | 🟢 `GET /diseases/:code` |
 | Live demo on landing | 🔴 Mock | 🟢 Debounced `POST /diagnose` |
-| `src/data/mockDiagnosis.ts` | 🔴 Used | ❌ Deleted |
-| `src/data/diseases.ts` / `symptoms.ts` | Mock-ish | 🟡 Reference data (banner added) |
+| `frontend/src/data/mockDiagnosis.ts` | 🔴 Used | ❌ Deleted |
+| `frontend/src/data/diseases.ts` / `symptoms.ts` | Mock-ish | 🟡 Reference data (banner added) |
 | Hero stat "47 Aturan" | 🔴 Wrong | 🟢 Fixed to 34 |
 
 ---
@@ -323,8 +323,8 @@ Engine compute itself ~5ms. Sebagian besar latency = Prisma query + JSON seriali
 ---
 
 **File terkait:**
-- `src/lib/api.ts` — fetch wrapper
-- `src/lib/diagnova-api.ts` — typed endpoints
-- `src/vite-env.d.ts` — env types
-- `.env.local`, `.env.example` — VITE_API_URL config
+- `frontend/src/lib/api.ts` — fetch wrapper
+- `frontend/src/lib/diagnova-api.ts` — typed endpoints
+- `frontend/src/vite-env.d.ts` — env types
+- `frontend/.env.local`, `frontend/.env.example` — VITE_API_URL config
 - `docs/backend/API.md` — endpoint reference (sisi backend)

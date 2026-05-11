@@ -1,8 +1,11 @@
 # Diagnova Backend
 
-Express + TypeScript + Prisma backend for the Diagnova ENT expert system.
+Express + TypeScript + Prisma backend untuk Diagnova ENT expert system.
 Implements a Certainty Factor (CF) inference engine based on
 Setyaputri, Fadlil & Sunardi (2018), Universitas Ahmad Dahlan.
+
+> 📘 Untuk overview project lengkap, setup, dan arsitektur, lihat
+> **[README utama](../README.md)** di root.
 
 ## Stack
 

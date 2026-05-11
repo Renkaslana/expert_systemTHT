@@ -319,7 +319,7 @@ npm run prisma:studio            # opens browser GUI on :5555
 
 ## 7. Tipe konsistensi dengan frontend
 
-Frontend `src/types/index.ts` punya interface yang **harus match** schema:
+Frontend `frontend/src/types/index.ts` punya interface yang **harus match** schema:
 
 | Frontend type | Backend table | Status |
 |---|---|---|
