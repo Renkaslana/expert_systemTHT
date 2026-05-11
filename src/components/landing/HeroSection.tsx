@@ -558,7 +558,7 @@ export function HeroSection() {
             />
             <Stat
               icon={<Workflow className="h-4 w-4" />}
-              value="47"
+              value="34"
               label="Aturan Inferensi"
             />
           </div>

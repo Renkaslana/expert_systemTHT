@@ -20,7 +20,8 @@ import {
 import { Button } from '@/components/ui/button'
 import { useConsultationStore, type AreaFilter } from '@/stores/consultationStore'
 import { SYMPTOMS, SYMPTOM_BY_CODE } from '@/data/symptoms'
-import { mockDiagnose } from '@/data/mockDiagnosis'
+import { diagnose, symptomMapToDiagnoseInput } from '@/lib/diagnova-api'
+import { ApiError } from '@/lib/api'
 import { cn } from '@/lib/utils'
 import type { SymptomCategory } from '@/types'
 
@@ -52,6 +53,7 @@ export function ConsultationPage() {
 
   const [query, setQuery] = useState('')
   const [processing, setProcessing] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   // Track whether the user has explicitly chosen a region in this session.
   // Default: not yet — show onboarding empty state.
   const [hasPickedRegion, setHasPickedRegion] = useState(false)
@@ -111,16 +113,58 @@ export function ConsultationPage() {
     setQuery('')
   }
 
-  const handleAnalyze = () => {
+  /**
+   * Diagnose flow with UX-tuned minimum perceived duration.
+   *
+   * The backend CF engine runs in ~50–80ms on local dev. Flashing a
+   * loading screen for <100ms feels jittery and undermines user trust
+   * in what is presented as a "medical expert system". We enforce a
+   * minimum loading window of MIN_PROCESSING_MS so:
+   *   • the multi-stage ProcessingAnimation has time to tell the user
+   *     what the engine is doing (forward-chaining → CF → explanation)
+   *   • the navigation feels deliberate, not a click-and-blink
+   *   • result page entrance reads as the completion of real work
+   *
+   * If the API takes longer than MIN_PROCESSING_MS, no extra wait —
+   * the screen exits as soon as the slower of the two finishes.
+   */
+  const MIN_PROCESSING_MS = 2200
+
+  const handleAnalyze = async () => {
     if (selectedCount === 0) return
+    setError(null)
     start()
     setProcessing(true)
-    window.setTimeout(() => {
-      const result = mockDiagnose(selectedSymptoms)
-      setResult(result)
-      setProcessing(false)
+
+    try {
+      const payload = symptomMapToDiagnoseInput(selectedSymptoms)
+
+      // Run API + minimum-wait in parallel; await both → finish at max.
+      const [response] = await Promise.all([
+        diagnose({ symptoms: payload }),
+        new Promise<void>((resolve) => window.setTimeout(resolve, MIN_PROCESSING_MS)),
+      ])
+
+      if (!response.results || response.results.length === 0) {
+        setError(
+          'Sistem tidak menemukan diagnosis dengan tingkat keyakinan minimum 10%. Coba ubah pilihan gejala atau tingkatkan bobot keyakinan.',
+        )
+        return
+      }
+
+      setResult(response.results)
       navigate('/hasil')
-    }, 1900)
+    } catch (err) {
+      const message =
+        err instanceof ApiError
+          ? err.code === 'NETWORK_ERROR'
+            ? 'Tidak bisa terhubung ke server. Pastikan backend berjalan di http://localhost:3001 lalu coba lagi.'
+            : err.message
+          : 'Terjadi kesalahan yang tidak terduga. Silakan coba lagi.'
+      setError(message)
+    } finally {
+      setProcessing(false)
+    }
   }
 
   // For the "Step 2" heading, prefer explicit region; if user has selected
@@ -361,6 +405,29 @@ export function ConsultationPage() {
             </div>
           </div>
         </motion.div>
+
+        {error && (
+          <div
+            role="alert"
+            className="fixed inset-x-4 bottom-24 z-40 mx-auto max-w-md rounded-2xl border border-rose-200 bg-rose-50/95 px-4 py-3 text-[13px] text-rose-900 shadow-lg backdrop-blur-md lg:bottom-6 lg:left-auto lg:right-6 lg:mx-0 dark:border-rose-500/30 dark:bg-rose-950/80 dark:text-rose-100"
+          >
+            <div className="flex items-start gap-2">
+              <span className="mt-0.5 inline-flex h-2 w-2 shrink-0 rounded-full bg-rose-500" />
+              <div className="flex-1">
+                <p className="font-medium">Gagal melakukan analisis</p>
+                <p className="mt-0.5 text-[12px] leading-relaxed opacity-90">{error}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setError(null)}
+                className="text-rose-700 transition-opacity hover:opacity-70 dark:text-rose-200"
+                aria-label="Tutup pesan error"
+              >
+                ×
+              </button>
+            </div>
+          </div>
+        )}
 
         <AnimatePresence>
           {processing && <ProcessingAnimation count={selectedCount} />}

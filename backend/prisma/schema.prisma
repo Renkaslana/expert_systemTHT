@@ -1,0 +1,187 @@
+// ═══════════════════════════════════════════════════════════════════
+//  Diagnova — Prisma Schema
+//  Sistem Pakar Diagnosis THT berbasis Certainty Factor
+//  Source: Setyaputri, Fadlil & Sunardi (2018), Universitas Ahmad Dahlan
+// ═══════════════════════════════════════════════════════════════════
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// ENUMS — match frontend types in src/types/index.ts
+// ─────────────────────────────────────────────────────────────────────
+
+enum SymptomCategory {
+  telinga
+  hidung
+  tenggorokan
+  umum
+}
+
+enum BodyArea {
+  ear
+  nose
+  throat
+  head
+  general
+}
+
+enum SymptomSeverity {
+  low
+  medium
+  high
+}
+
+enum DiseaseSeverity {
+  mild
+  moderate
+  severe
+}
+
+enum DiseaseIconKey {
+  ear
+  nose
+  throat
+  sinus
+  general
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// KNOWLEDGE BASE
+// ─────────────────────────────────────────────────────────────────────
+
+/// 24 ENT symptoms (G001..G024) — Setyaputri 2018, Tabel I
+model Symptom {
+  id          String          @id @default(cuid())
+  code        String          @unique // e.g. "G001"
+  name        String          // e.g. "Telinga nyeri"
+  nameEn      String          // e.g. "Ear pain"
+  category    SymptomCategory
+  bodyArea    BodyArea
+  severity    SymptomSeverity
+  description String
+
+  isActive    Boolean         @default(true)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  rules       CFRule[]
+
+  @@index([category])
+  @@index([isActive])
+  @@map("symptoms")
+}
+
+/// 5 ENT diseases (P001..P005) — Setyaputri 2018, Tabel II
+model Disease {
+  id              String          @id @default(cuid())
+  code            String          @unique // e.g. "P001"
+  name            String          // "Otitis Media Akut"
+  nameShort       String          // "OMA"
+  category        String          // "Penyakit Telinga"
+  severity        DiseaseSeverity
+  icdCode         String          // "H66.0"
+  iconKey         DiseaseIconKey
+  description     String
+
+  // Array fields (PostgreSQL native arrays)
+  causes          String[]
+  generalSymptoms String[] // human-readable names (not symptom codes)
+  treatmentAdvice String[]
+  relatedDiseases String[] // array of disease codes (e.g. ["P002","P003"])
+
+  whenToSeeDoctor String
+  expertSource    String          @default("dr. M. Agus Sugicharto, Sp.THT-KL")
+
+  isActive        Boolean         @default(true)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  rules               CFRule[]
+  consultationResults ConsultationResult[]
+
+  @@index([category])
+  @@index([isActive])
+  @@map("diseases")
+}
+
+/// CF rule base — 34 rules linking diseases ↔ symptoms with expert weights
+/// Setyaputri 2018, Tabel III (curated by dr. M. Agus Sugicharto, Sp.THT-KL)
+model CFRule {
+  id           String   @id @default(cuid())
+  diseaseId    String
+  symptomId    String
+
+  /// Expert confidence weight: must be 0.2 | 0.4 | 0.6 | 0.8 | 1.0
+  expertWeight Float
+
+  rationale    String?  // optional clinical rationale
+  version      Int      @default(1)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  disease Disease @relation(fields: [diseaseId], references: [id], onDelete: Cascade)
+  symptom Symptom @relation(fields: [symptomId], references: [id], onDelete: Cascade)
+
+  @@unique([diseaseId, symptomId])
+  @@index([diseaseId])
+  @@index([symptomId])
+  @@index([isActive])
+  @@map("cf_rules")
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// CONSULTATION SESSIONS — anonymous, token-based (no user accounts)
+// ─────────────────────────────────────────────────────────────────────
+
+/// One consultation = one set of inputs + computed results.
+/// Token in URL = soft auth (knowledge of token = access).
+model ConsultationSession {
+  id            String   @id @default(cuid())
+  sessionToken  String   @unique @default(cuid()) // shareable token
+
+  /// JSON: [{ symptomCode: "G020", userWeight: 0.8 }, ...]
+  inputSymptoms Json
+
+  /// JSON: full DiagnosisResult[] — for replay without recomputing
+  rawResults    Json
+
+  durationMs    Int?
+  ipHash        String?  // hashed IP for soft analytics & rate-limit attribution
+  userAgent     String?
+
+  createdAt     DateTime @default(now())
+
+  results       ConsultationResult[]
+
+  @@index([sessionToken])
+  @@index([createdAt])
+  @@map("consultation_sessions")
+}
+
+/// Top-3 disease results per session — denormalized for analytics queries
+model ConsultationResult {
+  id        String   @id @default(cuid())
+  sessionId String
+  diseaseId String
+
+  cfValue   Float
+  rank      Int      // 1, 2, or 3
+
+  createdAt DateTime @default(now())
+
+  session ConsultationSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  disease Disease             @relation(fields: [diseaseId], references: [id])
+
+  @@index([sessionId])
+  @@index([diseaseId])
+  @@index([rank])
+  @@map("consultation_results")
+}

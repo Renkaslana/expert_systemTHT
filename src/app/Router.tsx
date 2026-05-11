@@ -1,6 +1,5 @@
 import { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
-import { AnimatePresence } from 'framer-motion'
 import { Routes, Route } from 'react-router-dom'
 import { Navbar } from '@/components/shared/Navbar'
 import { Footer } from '@/components/shared/Footer'
@@ -48,23 +47,30 @@ function ScrollToTop() {
 }
 
 export function Router() {
-  const location = useLocation()
-
   return (
     <div className="flex min-h-full flex-col">
       <ScrollToTop />
       <Navbar />
-      <AnimatePresence mode="wait" initial={false}>
-        <Routes location={location} key={location.pathname}>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/konsultasi" element={<ConsultationPage />} />
-          <Route path="/hasil" element={<ResultPage />} />
-          <Route path="/penyakit" element={<DiseaseListPage />} />
-          <Route path="/penyakit/:id" element={<DiseaseDetailPage />} />
-          <Route path="/tentang" element={<AboutPage />} />
-          <Route path="*" element={<NotFoundPage />} />
-        </Routes>
-      </AnimatePresence>
+      {/*
+        AnimatePresence + Routes + mode="wait" was used here for page exit
+        animations, but it has a well-known compatibility issue: <Routes>
+        is not a motion component, so AnimatePresence can't reliably detect
+        when child PageShell's exit animation completes. This caused
+        navigations (e.g. /konsultasi → /hasil) to get stuck — old page
+        unmounts but new page never mounts. Removed in favor of per-page
+        entry animations (which each PageShell already does via
+        initial/animate). We lose the exit animation, but navigation is
+        instant and reliable.
+      */}
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/konsultasi" element={<ConsultationPage />} />
+        <Route path="/hasil" element={<ResultPage />} />
+        <Route path="/penyakit" element={<DiseaseListPage />} />
+        <Route path="/penyakit/:id" element={<DiseaseDetailPage />} />
+        <Route path="/tentang" element={<AboutPage />} />
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
       <Footer />
     </div>
   )

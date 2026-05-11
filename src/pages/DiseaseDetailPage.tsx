@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, Navigate, useParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import {
@@ -22,8 +22,10 @@ import { Badge } from '@/components/ui/badge'
 import { buttonVariants } from '@/components/ui/button'
 import { MedicalDisclaimer } from '@/components/shared/MedicalDisclaimer'
 import { AnatomyMini } from '@/components/visuals/AnatomyMini'
-import { DISEASES, DISEASE_BY_CODE } from '@/data/diseases'
+import { getDiseaseByCode, getDiseases } from '@/lib/diagnova-api'
+import { ApiError } from '@/lib/api'
 import { cn } from '@/lib/utils'
+import type { Disease } from '@/types'
 
 const ICONS = {
   ear: Ear,
@@ -51,16 +53,87 @@ const SEVERITY_BADGE = {
 export function DiseaseDetailPage() {
   const { id } = useParams<{ id: string }>()
   const [tab, setTab] = useState<TabKey>('overview')
+  const [disease, setDisease] = useState<Disease | null>(null)
+  const [allDiseases, setAllDiseases] = useState<Disease[]>([])
+  const [loading, setLoading] = useState(true)
+  const [notFound, setNotFound] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!id) return
+    const controller = new AbortController()
+    setLoading(true)
+    setError(null)
+    setNotFound(false)
+
+    Promise.all([
+      getDiseaseByCode(id, { signal: controller.signal }),
+      getDiseases({ signal: controller.signal }),
+    ])
+      .then(([detail, list]) => {
+        setDisease(detail)
+        setAllDiseases(list)
+      })
+      .catch((err) => {
+        if (err?.name === 'AbortError') return
+        if (err instanceof ApiError && err.status === 404) {
+          setNotFound(true)
+          return
+        }
+        const message =
+          err instanceof ApiError
+            ? err.code === 'NETWORK_ERROR'
+              ? 'Tidak bisa terhubung ke server backend.'
+              : err.message
+            : 'Terjadi kesalahan saat memuat detail penyakit.'
+        setError(message)
+      })
+      .finally(() => setLoading(false))
+
+    return () => controller.abort()
+  }, [id])
 
   if (!id) return <Navigate to="/penyakit" replace />
-  const disease = DISEASE_BY_CODE[id]
-  if (!disease) return <Navigate to="/penyakit" replace />
+  if (notFound) return <Navigate to="/penyakit" replace />
+
+  if (loading || !disease) {
+    return (
+      <PageShell withAurora>
+        <div className="container py-8 md:py-12">
+          <Link
+            to="/penyakit"
+            className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }))}
+          >
+            <ChevronLeft className="h-4 w-4" />
+            Daftar Penyakit
+          </Link>
+          {error ? (
+            <div
+              role="alert"
+              className="mt-8 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-900 dark:border-rose-500/30 dark:bg-rose-950/40 dark:text-rose-100"
+            >
+              {error}
+            </div>
+          ) : (
+            <div className="mt-8 space-y-4">
+              <div className="h-12 w-2/3 animate-pulse rounded bg-muted" />
+              <div className="h-4 w-1/2 animate-pulse rounded bg-muted" />
+              <div className="mt-8 h-64 animate-pulse rounded-2xl bg-muted" />
+            </div>
+          )}
+        </div>
+      </PageShell>
+    )
+  }
 
   const Icon = ICONS[disease.iconKey]
   const sev = SEVERITY_BADGE[disease.severity]
+  const diseaseByCode: Record<string, Disease> = Object.fromEntries(
+    allDiseases.map((d) => [d.code, d]),
+  )
   const related = disease.relatedDiseases
-    .map((c) => DISEASE_BY_CODE[c])
-    .filter(Boolean)
+    .map((c) => diseaseByCode[c])
+    .filter(Boolean) as Disease[]
 
   return (
     <PageShell withAurora>
@@ -314,7 +387,7 @@ export function DiseaseDetailPage() {
             Penyakit lain dalam knowledge base
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
-            {DISEASES.filter((d) => d.code !== disease.code).map((d) => (
+            {allDiseases.filter((d) => d.code !== disease.code).map((d) => (
               <Link
                 key={d.code}
                 to={`/penyakit/${d.code}`}

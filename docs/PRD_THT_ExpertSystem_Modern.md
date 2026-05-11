@@ -1,4 +1,4 @@
-# 🧠 ClaraTHT — Explainable AI Assisted Expert System
+# 🧠 Diagnova — Explainable AI Assisted Expert System
 ## Product Requirements Document (PRD) · v2.0
 
 > **Basis Ilmiah:** Setyaputri, K.E., Fadlil, A., & Sunardi. (2018). *Analisis Metode Certainty Factor pada Sistem Pakar Diagnosa Penyakit THT.* Jurnal Teknik Elektro Vol. 10 No. 1, hal. 30–35.

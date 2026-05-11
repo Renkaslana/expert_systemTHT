@@ -5,10 +5,11 @@ import { SectionHeader } from './SectionHeader'
 import { MiniConfidenceRing } from '@/components/visuals/MiniConfidenceRing'
 import { Soundwave } from '@/components/visuals/Soundwave'
 import { AnatomyMini } from '@/components/visuals/AnatomyMini'
-import { mockDiagnose } from '@/data/mockDiagnosis'
+import { diagnose, symptomMapToDiagnoseInput } from '@/lib/diagnova-api'
 import { CF_WEIGHT_OPTIONS, confidenceColor, cn } from '@/lib/utils'
 import { DISEASE_BY_CODE } from '@/data/diseases'
 import { IMG } from '@/data/landingImages'
+import type { DiagnosisResult } from '@/types'
 
 // ─────────────────────────────────────────────────────────────────────
 // Data
@@ -69,13 +70,40 @@ export function LiveDiagnosisDemo() {
     return () => clearInterval(id)
   }, [touched])
 
-  const result = useMemo(() => {
+  // ── Debounced real-engine call ─────────────────────────────────────
+  // Calling the backend on every slider tick would spam requests, so we
+  // debounce 250ms after the last weight change. Previous in-flight
+  // requests are aborted via AbortController.
+  const [result, setResult] = useState<DiagnosisResult[]>([])
+
+  const symptomPayload = useMemo(() => {
     const map = new Map<string, number>()
     for (const [k, v] of Object.entries(weights)) {
       if (v > 0) map.set(k, v)
     }
-    return mockDiagnose(map)
+    return symptomMapToDiagnoseInput(map)
   }, [weights])
+
+  useEffect(() => {
+    if (symptomPayload.length === 0) {
+      setResult([])
+      return
+    }
+    const controller = new AbortController()
+    const handle = window.setTimeout(() => {
+      diagnose({ symptoms: symptomPayload }, { signal: controller.signal })
+        .then((res) => setResult(res.results))
+        .catch((err) => {
+          if (err?.name === 'AbortError') return
+          // Demo is non-critical — silently keep previous result on error
+          // (typically backend offline). UI still works with stale data.
+        })
+    }, 250)
+    return () => {
+      window.clearTimeout(handle)
+      controller.abort()
+    }
+  }, [symptomPayload])
 
   const primary = result[0]
   const c = primary ? confidenceColor(primary.confidenceLevel) : null

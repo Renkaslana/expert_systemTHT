@@ -1,3 +1,16 @@
+/**
+ * ⚠️  FRONTEND REFERENCE DATA — bundled copy of backend's knowledge base.
+ *
+ *  Used by the landing-page KnowledgeBaseSection (marketing preview cards)
+ *  and as fallback lookups. The CANONICAL source is the backend database
+ *  (seeded via `backend/prisma/seed.ts`).
+ *
+ *  Real consultation pages (`/penyakit`, `/penyakit/:id`) fetch from
+ *  `GET /api/v1/diseases` and `GET /api/v1/diseases/:code`.
+ *
+ *  This is NOT mock data — it mirrors backend exactly. Keep in sync when
+ *  expert weights or descriptions are updated.
+ */
 import type { Disease, CFRule } from '@/types'
 
 export const DISEASES: Disease[] = [

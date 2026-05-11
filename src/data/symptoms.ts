@@ -1,3 +1,19 @@
+/**
+ * ⚠️  FRONTEND REFERENCE DATA — bundled copy of backend's knowledge base.
+ *
+ *  The CANONICAL source for symptoms is the backend (PostgreSQL, seeded via
+ *  `backend/prisma/seed.ts`). This file ships the same data with the frontend
+ *  bundle so the UI can render synchronously without an API round-trip for:
+ *    • the consultation symptom list (24 cards)
+ *    • the result-page region heatmap (SYMPTOM_BY_CODE lookups)
+ *    • UI metadata not exposed by the API (SYMPTOM_CATEGORIES descriptions)
+ *
+ *  This is NOT mock data. The actual diagnosis (POST /diagnose) always runs
+ *  against the backend with the backend's authoritative knowledge base.
+ *
+ *  Keep this file in sync with `backend/prisma/seed.ts` when expert weights
+ *  or symptom definitions change.
+ */
 import type { Symptom } from '@/types'
 
 export const SYMPTOMS: Symptom[] = [
