@@ -20,26 +20,47 @@ export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const lastY = useRef(0)
   const [visible, setVisible] = useState(true)
+  const rafId = useRef<number | null>(null)
+  const scrolledRef = useRef(false)
+  const visibleRef = useRef(true)
 
   const { scrollYProgress } = useScroll()
   const accentOpacity = useTransform(scrollYProgress, [0, 0.04, 1], [0, 1, 1])
   const accentWidth = useTransform(scrollYProgress, [0, 1], ['0%', '100%'])
 
   useEffect(() => {
-    const onScroll = () => {
+    const update = () => {
+      rafId.current = null
       const y = window.scrollY
-      setScrolled(y > 24)
-      // Hide on fast scroll down, show on scroll up
-      if (y > 80) {
-        setVisible(y < lastY.current || y < 120)
-      } else {
-        setVisible(true)
+      const prevY = lastY.current
+
+      const nextScrolled = y > 24
+      if (nextScrolled !== scrolledRef.current) {
+        scrolledRef.current = nextScrolled
+        setScrolled(nextScrolled)
       }
+
+      // Hide on fast scroll down, show on scroll up
+      const nextVisible = y > 80 ? y < prevY || y < 120 : true
+      if (nextVisible !== visibleRef.current) {
+        visibleRef.current = nextVisible
+        setVisible(nextVisible)
+      }
+
       lastY.current = y
     }
+
+    const onScroll = () => {
+      if (rafId.current != null) return
+      rafId.current = window.requestAnimationFrame(update)
+    }
+
     onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      if (rafId.current != null) window.cancelAnimationFrame(rafId.current)
+    }
   }, [])
 
   // Close mobile menu on route change

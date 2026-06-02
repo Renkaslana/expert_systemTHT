@@ -4,6 +4,13 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Performance: allow browsers to skip layout/paint for offscreen sections */
+.cv-auto {
+  content-visibility: auto;
+  contain: layout paint style;
+  contain-intrinsic-size: auto 1000px;
+}
+
 /* ═══════════════════════════════════════════════════════════════════
    DESIGN TOKENS
 ══════════════════════════════════════════════════════════════════ */

@@ -1,5 +1,5 @@
-import { useRef, useState } from 'react'
-import { motion, useScroll, useTransform } from 'framer-motion'
+import { useState } from 'react'
+import { motion } from 'framer-motion'
 import { ChevronDown, Eye, Lock, ScrollText, Sliders } from 'lucide-react'
 import { FloatingPanel } from './primitives/FloatingPanel'
 import { ContributionBar } from './primitives/ContributionBar'
@@ -88,18 +88,10 @@ const PILLARS = [
 // Section
 // ─────────────────────────────────────────────────────────────────────
 export function ExplainableAISection() {
-  const sectionRef = useRef<HTMLElement>(null)
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ['start end', 'end start'],
-  })
-  const imgY = useTransform(scrollYProgress, [0, 1], [-30, 30])
-
   return (
     <section
-      ref={sectionRef}
       id="explainable"
-      className="relative overflow-hidden py-28 md:py-36"
+      className="cv-auto relative overflow-hidden py-28 md:py-36"
       style={{
         background: 'linear-gradient(180deg, #030610 0%, #050914 50%, #060B18 100%)',
       }}
@@ -147,11 +139,10 @@ export function ExplainableAISection() {
                 boxShadow: '0 0 0 1px rgba(245,158,11,0.08), 0 40px 100px -30px rgba(0,0,0,0.75)',
               }}
             >
-              <motion.img
+              <img
                 src="/img-inspector.png"
                 alt="Inspektur penalaran AI — jejak Certainty Factor diagnosis ENT"
                 className="h-full w-full object-cover"
-                style={{ y: imgY }}
                 loading="lazy"
                 decoding="async"
               />

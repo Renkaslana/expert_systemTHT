@@ -48,13 +48,14 @@ export function HeroSection() {
   useEffect(() => {
     const el = sectionRef.current
     if (!el) return
+    if (!window.matchMedia('(pointer: fine)').matches) return
     const onMove = (e: MouseEvent) => {
       const { left, top, width, height } = el.getBoundingClientRect()
       mx.set((e.clientX - left) / width - 0.5)
       my.set((e.clientY - top) / height - 0.5)
     }
-    window.addEventListener('mousemove', onMove, { passive: true })
-    return () => window.removeEventListener('mousemove', onMove)
+    el.addEventListener('mousemove', onMove, { passive: true })
+    return () => el.removeEventListener('mousemove', onMove)
   }, [mx, my])
 
   return (

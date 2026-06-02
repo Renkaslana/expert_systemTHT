@@ -1,6 +1,5 @@
-import { useRef } from 'react'
 import { Link } from 'react-router-dom'
-import { motion, useScroll, useTransform } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { ArrowRight, ArrowUpRight, Layers, Microscope, TrendingUp } from 'lucide-react'
 import { SectionHeader } from './SectionHeader'
 import { buttonVariants } from '@/components/ui/button'
@@ -48,7 +47,7 @@ export function KnowledgeBaseSection() {
   return (
     <section
       id="knowledge"
-      className="relative overflow-hidden py-28 md:py-36"
+      className="cv-auto relative overflow-hidden py-28 md:py-36"
       style={{
         background:
           'radial-gradient(130% 80% at 30% 0%, hsl(var(--background)) 0%, hsl(var(--muted)/0.7) 60%, hsl(var(--background)) 100%)',
@@ -240,13 +239,6 @@ function KBStat({
 // Featured disease card
 // ─────────────────────────────────────────────────────────────────────
 function FeaturedDiseaseCard({ disease }: { disease: (typeof DISEASES)[number] }) {
-  const cardRef = useRef<HTMLElement>(null)
-  const { scrollYProgress } = useScroll({
-    target: cardRef,
-    offset: ['start end', 'end start'],
-  })
-  const imgScale = useTransform(scrollYProgress, [0, 0.5, 1], [1.08, 1, 1.08])
-
   const rules = CF_RULES.filter((r) => r.diseaseCode === disease.code)
     .sort((a, b) => b.expertWeight - a.expertWeight)
     .slice(0, 4)
@@ -256,7 +248,6 @@ function FeaturedDiseaseCard({ disease }: { disease: (typeof DISEASES)[number] }
 
   return (
     <motion.article
-      ref={cardRef}
       initial={{ opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-60px' }}
@@ -274,14 +265,14 @@ function FeaturedDiseaseCard({ disease }: { disease: (typeof DISEASES)[number] }
 
       {/* Hero photo */}
       <div className="relative aspect-[16/9] w-full overflow-hidden">
-        <motion.div style={{ scale: imgScale }} className="h-full w-full">
+        <div className="h-full w-full transition-transform duration-700 ease-out group-hover:scale-[1.03]">
           <SmartImage
             src={photo.src}
             alt={photo.alt}
             region={photo.region}
             imgClassName="h-full w-full object-cover"
           />
-        </motion.div>
+        </div>
         <div
           className="pointer-events-none absolute inset-0"
           style={{ background: 'linear-gradient(to top, rgba(5,8,20,0.65) 0%, rgba(5,8,20,0.0) 50%)' }}

@@ -1,33 +1,22 @@
-import { useRef } from 'react'
 import { Link } from 'react-router-dom'
-import { motion, useScroll, useTransform } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { ArrowRight, CheckCircle2, Shield, Sparkles, Zap } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { buttonVariants } from '@/components/ui/button'
 
 export function CTASection() {
-  const sectionRef = useRef<HTMLElement>(null)
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ['start end', 'end start'],
-  })
-  const imgScale = useTransform(scrollYProgress, [0, 0.5, 1], [1.08, 1, 1.08])
-  const imgY = useTransform(scrollYProgress, [0, 1], [-30, 30])
-
   return (
     <section
-      ref={sectionRef}
       id="get-started"
-      className="relative isolate overflow-hidden"
+      className="cv-auto relative isolate overflow-hidden"
       style={{ background: '#02040D' }}
     >
       {/* ── Full-bleed cinematic image ── */}
       <div className="absolute inset-0" aria-hidden>
-        <motion.img
+        <img
           src="/img-cta.png"
           alt=""
           className="h-full w-full object-cover"
-          style={{ scale: imgScale, y: imgY }}
           loading="lazy"
           decoding="async"
         />

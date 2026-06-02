@@ -1,5 +1,5 @@
-import { useRef, useState } from 'react'
-import { motion, useScroll, useTransform } from 'framer-motion'
+import { useState } from 'react'
+import { motion } from 'framer-motion'
 import {
   ClipboardList,
   GitBranch,
@@ -71,7 +71,7 @@ export function HowItWorksSection() {
   return (
     <section
       id="how-it-works"
-      className="relative overflow-hidden py-28 md:py-36"
+      className="cv-auto relative overflow-hidden py-28 md:py-36"
       style={{
         background:
           'linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--muted)) 100%)',
@@ -525,18 +525,10 @@ function StepCard({
   isCenter: boolean
   onHover: () => void
 }) {
-  const cardRef = useRef<HTMLDivElement>(null)
-  const { scrollYProgress } = useScroll({
-    target: cardRef,
-    offset: ['start end', 'end start'],
-  })
-  const imgScale = useTransform(scrollYProgress, [0, 0.5, 1], [1.06, 1, 1.06])
-
   const TaglineIcon = step.taglineIcon
 
   return (
     <motion.div
-      ref={cardRef}
       initial={{ opacity: 0, y: 32 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-80px' }}
@@ -584,11 +576,10 @@ function StepCard({
 
       {/* Image area with parallax */}
       <div className="relative aspect-[16/10] w-full overflow-hidden">
-        <motion.img
+        <img
           src={step.imageSrc}
           alt={step.imageAlt}
-          className="h-full w-full object-cover"
-          style={{ scale: imgScale }}
+          className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
           loading="lazy"
           decoding="async"
         />

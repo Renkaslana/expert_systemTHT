@@ -1,6 +1,6 @@
 import { useRef } from 'react'
 import { Link } from 'react-router-dom'
-import { motion, useScroll, useTransform } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { ArrowRight, BookOpen, FileText, Quote, Stethoscope } from 'lucide-react'
 import { SmartImage } from './primitives/SmartImage'
 import { IMG } from '@/data/landingImages'
@@ -80,7 +80,7 @@ export function MethodologySection() {
   return (
     <section
       id="methodology"
-      className="relative overflow-hidden py-28 md:py-36"
+      className="cv-auto relative overflow-hidden py-28 md:py-36"
       style={{
         background: 'linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--muted)) 100%)',
       }}
@@ -253,16 +253,8 @@ function StepArticle({
   step: (typeof STEPS)[number]
   index: number
 }) {
-  const cardRef = useRef<HTMLElement>(null)
-  const { scrollYProgress } = useScroll({
-    target: cardRef,
-    offset: ['start end', 'end start'],
-  })
-  const imgScale = useTransform(scrollYProgress, [0, 0.5, 1], [1.08, 1, 1.08])
-
   return (
     <motion.article
-      ref={cardRef}
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-60px' }}
@@ -273,14 +265,14 @@ function StepArticle({
       }}
     >
       <div className="relative aspect-[4/3] w-full overflow-hidden">
-        <motion.div style={{ scale: imgScale }} className="h-full w-full">
+        <div className="h-full w-full transition-transform duration-700 ease-out group-hover:scale-[1.04]">
           <SmartImage
             src={step.image.src}
             alt={step.image.alt}
             region={step.image.region}
             imgClassName="h-full w-full object-cover"
           />
-        </motion.div>
+        </div>
         <div
           className="pointer-events-none absolute inset-0"
           style={{

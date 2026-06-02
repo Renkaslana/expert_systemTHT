@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { motion, useScroll, useTransform } from 'framer-motion'
+import { useEffect, useMemo, useState } from 'react'
+import { motion } from 'framer-motion'
 import { Activity, BrainCircuit, MousePointerClick, Sparkles, Wand2 } from 'lucide-react'
 import { SectionHeader } from './SectionHeader'
 import { MiniConfidenceRing } from '@/components/visuals/MiniConfidenceRing'
@@ -46,13 +46,6 @@ const PRESETS = [
 // Section
 // ─────────────────────────────────────────────────────────────────────
 export function LiveDiagnosisDemo() {
-  const sectionRef = useRef<HTMLElement>(null)
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ['start end', 'end start'],
-  })
-  const imgY = useTransform(scrollYProgress, [0, 1], [-20, 20])
-
   const [weights, setWeights] = useState<Record<string, number>>(() =>
     Object.fromEntries(DEMO_SYMPTOMS.map((s) => [s.code, s.defaultWeight])),
   )
@@ -112,18 +105,17 @@ export function LiveDiagnosisDemo() {
 
   return (
     <section
-      ref={sectionRef}
       id="try-engine"
-      className="relative overflow-hidden py-28 md:py-36"
+      className="cv-auto relative overflow-hidden py-28 md:py-36"
       style={{ background: 'linear-gradient(180deg, #020610 0%, #030812 100%)' }}
     >
       {/* Photo backdrop */}
       <div className="pointer-events-none absolute inset-0" aria-hidden>
-        <motion.img
+        <img
           src={IMG.demoBackdrop.src}
           alt=""
           className="h-full w-full object-cover opacity-20"
-          style={{ y: imgY, filter: 'grayscale(0.3) saturate(0.65)' }}
+          style={{ filter: 'grayscale(0.3) saturate(0.65)' }}
           loading="lazy"
           decoding="async"
         />
