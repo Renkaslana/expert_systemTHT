@@ -12,6 +12,12 @@ untuk pasien dan tenaga medis non-spesialis.
 
 ---
 
+## 🖼️ Screenshots
+
+| Landing Page | Hasil Diagnosis |
+|---|---|
+| ![Landing Page](docs/assets/home.png) | ![Hasil Diagnosis](docs/assets/diagnosa-result.png) |
+
 ## 📑 Daftar Isi
 
 1. [Tentang Project](#1-tentang-project)
